@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zereck — Archmage of Insights</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Forum&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Forum', serif;
+      background: url('forest.jpg') center/cover fixed;
+      color: #ddd;
+    }
+    .header {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+    .lang-select {
+      font-family: 'Forum';
+      font-size: 1rem;
+      padding: 0.3rem;
+    }
+    .main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 4rem 2rem 2rem;
+    }
+    .left, .right {
+      padding: 1rem;
+    }
+    .left {
+      flex: 1;
+      min-width: 300px;
+      text-align: center;
+    }
+    .right {
+      flex: 2;
+      min-width: 300px;
+    }
+    .name {
+      font-size: 2.5rem;
+      color: #a8e6cf;
+      text-shadow: 0 0 8px rgba(0, 50, 0, 0.5);
+    }
+    .avatar {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 3px solid #a8e6cf;
+    }
+    .contacts {
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    .contacts a,
+    .contacts span {
+      color: #caffbf;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      cursor: pointer;
+    }
+    .contacts a:hover {
+      text-shadow: 0 0 10px #caffbf;
+    }
+    canvas {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(30, 40, 30, 0.8);
+      border-radius: 10px;
+      padding: 1rem;
+      transition: box-shadow 0.3s;
+    }
+    canvas:hover {
+      box-shadow: 0 0 20px #caffbf;
+    }
+    .section {
+      margin-top: 2rem;
+    }
+    .section h2 {
+      border-bottom: 2px solid #a8e6cf;
+      padding-bottom: 0.3rem;
+      margin-bottom: 1rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 0.3rem 0;
+      border-bottom: 1px dashed #a8e6cf;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal {
+      background: #1a2b1f;
+      padding: 2rem;
+      border: 3px solid #a8e6cf;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+    }
+    .modal input,
+    .modal textarea {
+      width: 90%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border: 1px solid #a8e6cf;
+      background: transparent;
+      color: #ddd;
+      font-family: 'Forum';
+    }
+    .modal button,
+    .modal .close-btn {
+      padding: 0.5rem 1rem;
+      background: #a8e6cf;
+      color: #1a2b1f;
+      border: none;
+      cursor: pointer;
+      font-family: 'Forum';
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #333;
+      width: 30px;
+      height: 30px;
+    }
+    .notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: #caffbf;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      display: none;
+      font-family: 'Forum';
+      z-index: 20;
+    }
+    @media (max-width: 768px) {
+      .main {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <select id="langSelect" class="lang-select">
+    <option value="en">EN</option>
+    <option value="ru">RU</option>
+    <option value="ro">RO</option>
+    <option value="sv">SV</option>
+  </select>
+</div>
+
+<div class="main">
+  <div class="left">
+    <div class="name" data-msg="name">Zereck</div>
+    <img src="avatar.png" alt="Zereck" class="avatar"/>
+    <div class="contacts">
+      <a id="summonBtn" data-msg="summon">Summon Hero</a> |
+      <a href="#" data-msg="github">GitHub</a> |
+      <a href="#" data-msg="linkedin">LinkedIn</a> |
+      <span>📞 +373 68 123456</span>
+    </div>
+    <canvas id="skillsChart"></canvas>
+  </div>
+  <div class="right">
+    <div class="section">
+      <h2 data-msg="about">About Me</h2>
+      <p data-msg="aboutText">I am Zereck — a support mage turned data wizard...</p>
+    </div>
+    <div class="section">
+      <h2 data-msg="experience">Experience</h2>
+      <ul>
+        <li data-msg="exp1">2020–2023 — Support</li>
+        <li data-msg="exp2">2023 — Retraining</li>
+        <li data-msg="exp3">2024 — Internship</li>
+      </ul>
+    </div>
+    <div class="section">
+      <h2 data-msg="projects">Projects</h2>
+      <ul>
+        <li data-msg="proj1">Behavior analysis...</li>
+        <li data-msg="proj2">Job parsing...</li>
+        <li data-msg="proj3">Dashboard creation...</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">×</button>
+    <h2 data-msg="modalTitle">Summon Zereck</h2>
+    <input type="text" placeholder="Your name" data-msg="modalName"/>
+    <input type="email" placeholder="Email" data-msg="modalEmail"/>
+    <textarea rows="4" placeholder="Your message" data-msg="modalText"></textarea>
+    <button onclick="submitForm()" data-msg="modalSend">Send</button>
+  </div>
+</div>
+
+<div id="notification" class="notification"></div>
+
+<script>
+  const messages = {
+    en: {
+      summon: 'Summon Hero', github: 'GitHub', linkedin: 'LinkedIn',
+      about: 'About Me', aboutText: 'I am Zereck — a support mage who spent many years helping others in digital worlds. One day, upon discovering the power hidden in data, I traded my grimoire for a Jupyter Notebook. Now I wander in search of knowledge in analytics, visualization, and machine learning to unravel the mysteries of numbers and become the Archmage of Insights.',
+      experience: 'Experience', exp1: '2020–2023 — Support',
+      exp2: '2023 — Retraining', exp3: '2024 — Internship',
+      projects: 'Projects', proj1: 'Behavior analysis...', proj2: 'Job parsing...',
+      proj3: 'Dashboard creation...',
+      modalTitle: 'Summon Zereck', modalName: 'Your name', modalEmail: 'Email',
+      modalText: 'Your message', modalSend: 'Send',
+      notification: 'Hero summoned!'
+    },
+    ru: {
+      summon: 'Призвать героя', github: 'GitHub', linkedin: 'LinkedIn',
+      about: 'О себе', aboutText: 'Я Zereck — маг поддержки, долгие годы помогавший другим в цифровых мирах. Однажды, увидев силу, скрытую в данных, я сменил гримуар на Jupyter Notebook. Теперь странствую в поисках знаний об аналитике, визуализации и машинном обучении, чтобы разгадать тайны чисел и стать Архимагом Инсайтов.',
+      experience: 'Опыт работы', exp1: '2020–2023 — Поддержка',
+      exp2: '2023 — Переобучение', exp3: '2024 — Стажировка',
+      projects: 'Проекты', proj1: 'Анализ поведения...', proj2: 'Парсинг вакансий...',
+      proj3: 'Создание дашборда...',
+      modalTitle: 'Призвать Zereck', modalName: 'Твоё имя', modalEmail: 'Email',
+      modalText: 'Твоё послание', modalSend: 'Отправить',
+      notification: 'Герой призван!'
+    },
+    ro: { summon:'Chemare erou', github:'GitHub', linkedin:'LinkedIn',
+        about:'Despre mine', aboutText:'Sunt Zereck — un magician support care a ajutat mulți ani pe alții în lumile digitale. Într-o zi, descoperind puterea ascunsă în date, am înlocuit grimoriul cu Jupyter Notebook. Acum rătăcesc în căutarea cunoașterii despre analiză, vizualizare și machine learning, pentru a descifra misterele numerelor și a deveni Arhimagul Insight-urilor.',
+        experience:'Experiență', exp1:'2020–2023 — Suport',
+        exp2:'2023 — Recalificare', exp3:'2024 — Internship',
+        projects:'Proiecte', proj1:'Analiză comportament...', proj2:'Parsing joburi...',
+        proj3:'Creare dashboard...',
+        modalTitle:'Chemă Zereck', modalName:'Numele tău', modalEmail:'Email',
+        modalText:'Mesajul tău', modalSend:'Trimite',
+        notification:'Erou convocat!' },
+      sv: { summon:'Framkalla hjälte', github:'GitHub', linkedin:'LinkedIn',
+        about:'Om mig', aboutText:'Jag är Zereck – en stödmage som under många år hjälpte andra i digitala världar. En dag, när jag upptäckte kraften som döljer sig i data, bytte jag min grimoire mot en Jupyter Notebook. Nu vandrar jag i jakt på kunskap om analys, visualisering och maskininlärning för att avslöja siffrornas mysterier och bli Insikternas Ärkemagiker.',
+        experience:'Erfarenhet', exp1:'2020–2023 — Support',
+        exp2:'2023 — Omskolning', exp3:'2024 — Praktik',
+        projects:'Projekt', proj1:'Beteendeanalys...', proj2:'Jobb-parsing...',
+        proj3:'Dashboard skapande...',
+        modalTitle:'Framkalla Zereck', modalName:'Ditt namn', modalEmail:'Email',
+        modalText:'Ditt meddelande', modalSend:'Skicka',
+        notification:'Hjälte kallad!' },
+    };
+  
+
+  function setLanguage(lang) {
+    document.querySelectorAll('[data-msg]').forEach(el => {
+      const key = el.getAttribute('data-msg');
+      if (messages[lang][key]) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.placeholder = messages[lang][key];
+        } else {
+          el.textContent = messages[lang][key];
+        }
+      }
+    });
+  }
+
+  document.getElementById('langSelect').onchange = (e) => {
+    const lang = e.target.value;
+    setLanguage(lang);
+    window.history.pushState({}, '', '/' + lang);
+  };
+
+  // Detect language from URL
+  const pathLang = window.location.pathname.split('/')[1];
+  const validLangs = ['en', 'ru', 'ro', 'sv'];
+  const selectedLang = validLangs.includes(pathLang) ? pathLang : 'en';
+  document.getElementById('langSelect').value = selectedLang;
+  setLanguage(selectedLang);
+
+  document.getElementById('summonBtn').onclick = () => {
+    document.getElementById('modalOverlay').style.display = 'flex';
+  };
+
+  function closeModal() {
+    document.getElementById('modalOverlay').style.display = 'none';
+  }
+
+  function submitForm() {
+    closeModal();
+    const lang = document.getElementById('langSelect').value;
+    const note = document.getElementById('notification');
+    note.textContent = messages[lang].notification;
+    note.style.display = 'block';
+    setTimeout(() => note.style.display = 'none', 3000);
+  }
+
+  new Chart(document.getElementById('skillsChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Research', 'Statistics', 'ML', 'Soft Skills', 'Visualization', 'Excel/BI', 'SQL', 'ETL', 'Programming'],
+      datasets: [{
+        data: [2, 4, 2, 4, 5, 5, 4, 2, 3],
+        backgroundColor: 'rgba(24,48,36,0.4)',
+        borderColor: '#a8e6cf',
+        pointBackgroundColor: '#caffbf',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        r: {
+          angleLines: { display: true, color: '#567d46' },
+          grid: { color: '#567d46' },
+          suggestedMin: 0,
+          suggestedMax: 5,
+          ticks: { display: false }
+        }
+      },
+      plugins: { legend: { display: false } },
+      animation: { duration: 1500, easing: 'easeOutQuint' }
+    }
+  });
+</script>
+</body>
+</html>
